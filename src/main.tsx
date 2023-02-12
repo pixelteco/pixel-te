@@ -9,15 +9,19 @@ import Text from "./components/Text/Text";
 import Team from "./components/Team/Team";
 import Footer from "./components/Footer/Footer";
 import About from "./components/About/About";
+
 import "./main.css"
 
 export default function main() {
   return (
     <div className='main-dev'>
-                <div id="Home"><Nav/></div>
-                <div className='mt-5'><Rarity/></div>
-                <div id="Text"className='mt-5'><Text/></div>
-                <div className='mt-5'id="Mint"><App/></div>
+               
+                  <div id="Home"><Nav/></div>
+            
+                  <div className='mt-5'><Rarity/></div>
+                  <div id="Text"className='mt-5'><Text/></div>
+                  <div className='mt-5'id="Mint"><App/></div>
+                
                 <div className='mt-5' id="Video"><Video/></div>
                 <div id="About"><About/></div>
                 <div id="Roadmap"><RoadMap/></div>

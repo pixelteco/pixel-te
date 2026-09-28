@@ -51,10 +51,10 @@ const network = (process.env.REACT_APP_SOLANA_NETWORK ??
   "devnet") as WalletAdapterNetwork;
 const rpcHost =
   process.env.REACT_APP_SOLANA_RPC_HOST ?? anchor.web3.clusterApiUrl("devnet");
-const connection = new anchor.web3.Connection(rpcHost);
+const connection = new anchor.web3.Connection(rpcHost, "confirmed");
 
 const App = () => {
-  const endpoint = useMemo(() => clusterApiUrl(network), []);
+  const endpoint = useMemo(() => rpcHost, [rpcHost]);
 
   const wallets = useMemo(
     () => [
@@ -64,7 +64,7 @@ const App = () => {
       new SolletWalletAdapter({ network }),
       new SolletExtensionWalletAdapter({ network }),
     ],
-    []
+    [network]
   );
 
   return (

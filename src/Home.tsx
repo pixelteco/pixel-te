@@ -71,6 +71,7 @@ const Home = (props: HomeProps) => {
   const [discountPrice, setDiscountPrice] = useState<anchor.BN>();
   const [needTxnSplit, setNeedTxnSplit] = useState(true);
   const [setupTxn, setSetupTxn] = useState<SetupState>();
+  const [walletBalanceSol, setWalletBalanceSol] = useState<number>();
 
   const rpcUrl = props.rpcHost;
   const anchorWallet = useAnchorWallet();
@@ -185,6 +186,7 @@ const Home = (props: HomeProps) => {
             const balance = new anchor.BN(
               await connection.getBalance(publicKey)
             );
+            setWalletBalanceSol(balance.toNumber() / anchor.web3.LAMPORTS_PER_SOL);
             const valid = balance.gte(userPrice);
             setIsValidBalance(valid);
             active = active && valid;
@@ -395,10 +397,10 @@ const Home = (props: HomeProps) => {
       if (!error.msg) {
         if (!error.message) {
           message = "Transaction timeout! Please try again.";
-        } else if (error.message.indexOf("0x137")) {
+        } else if (error.message.includes("0x137")) {
           console.log(error);
           message = `SOLD OUT!`;
-        } else if (error.message.indexOf("0x135")) {
+        } else if (error.message.includes("0x135")) {
           message = `Insufficient funds to mint. Please fund your wallet.`;
         }
       } else {
@@ -477,6 +479,57 @@ const Home = (props: HomeProps) => {
             color:"black"
           }}
         >
+
+          {connected && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: 12,
+                border: "1px solid #666",
+                borderRadius: 6,
+                background: "#f5f5f5",
+                color: "#111",
+                fontSize: 13,
+                lineHeight: 1.6,
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                Candy Machine Debug
+              </div>
+              <div>Network: {props.network}</div>
+              <div>Candy Machine: {props.candyMachineId?.toBase58() ?? "Invalid / missing"}</div>
+              <div>State loaded: {candyMachine ? "YES" : "NO"}</div>
+              <div>Active: {isActive ? "YES" : "NO"}</div>
+              <div>Sold out: {candyMachine?.state.isSoldOut ? "YES" : "NO"}</div>
+              <div>Remaining: {itemsRemaining ?? "Unknown"}</div>
+              <div>
+                Price: {candyMachine ? `◎ ${formatNumber.asNumber(candyMachine.state.price)}` : "Unknown"}
+              </div>
+              <div>
+                Wallet balance: {walletBalanceSol === undefined ? "Unknown" : `${walletBalanceSol.toFixed(4)} SOL`}
+              </div>
+              <div>Enough balance: {isValidBalance ? "YES" : "NO / UNKNOWN"}</div>
+              <div>Whitelist user: {isWhitelistUser ? "YES" : "NO"}</div>
+              <div>Presale: {isPresale ? "YES" : "NO"}</div>
+              <div>
+                Go live: {candyMachine?.state.goLiveDate
+                  ? toDate(candyMachine.state.goLiveDate)?.toLocaleString()
+                  : "Not set"}
+              </div>
+              <div>End date: {endDate ? endDate.toLocaleString() : "Not set"}</div>
+              <div style={{ marginTop: 6, fontWeight: 600 }}>
+                {candyMachine
+                  ? candyMachine.state.isSoldOut
+                    ? "Mint disabled reason: SOLD OUT"
+                    : !isValidBalance
+                    ? "Mint disabled reason: insufficient balance or token eligibility"
+                    : !isActive
+                    ? "Mint disabled reason: Candy Machine is not active (check go-live, end date, whitelist/gatekeeper)"
+                    : "Mint status: READY"
+                  : "Mint disabled reason: Candy Machine state did not load (check RPC and account address)"}
+              </div>
+            </div>
+          )}
           {!connected ? (
             <ConnectButton
               onClick={(e) => {
